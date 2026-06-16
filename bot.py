@@ -119,6 +119,7 @@ async def on_ready():
 async def main():
     async with bot:
         await bot.load_extension("cogs.auto_role")
+        await bot.load_extension("cogs.welcome_threads")
         await bot.load_extension("cogs.reaction_roles")
         await bot.load_extension("cogs.self_intro_role")
         await bot.load_extension("cogs.thread_verification")
