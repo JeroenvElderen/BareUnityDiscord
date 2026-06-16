@@ -1,4 +1,6 @@
 import discord
+import json
+import os
 from discord.ext import commands
 from discord.ui import View, Button
 from discord import app_commands
@@ -8,10 +10,46 @@ CASE_FORUM = 1516175139761291284
 COMMUNITY_WATCH_ROLE = 1516171676361035796
 MEMBER_RECORDS_CHANNEL = 1516172309881290912
 
+REPORTS_FILE = "reports.json"
+
 WARNING_EMOJI = "⚠️"
 
 # message_id -> report data
-reports = {}
+def load_reports():
+
+    if not os.path.exists(REPORTS_FILE):
+        return {}
+
+    try:
+
+        with open(
+            REPORTS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            return json.load(f)
+
+    except Exception:
+        return {}
+
+
+def save_reports():
+
+    with open(
+        REPORTS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            reports,
+            f,
+            indent=4
+        )
+
+
+reports = load_reports()
 
 
 class ReportView(View):
@@ -30,6 +68,24 @@ class ReportView(View):
         button: discord.ui.Button
     ):
 
+        try:
+
+            embed = interaction.message.embeds[0]
+
+            target_message_id = int(
+                embed.footer.text.split("|")[0]
+            )
+
+            reports.pop(
+                str(target_message_id),
+                None
+            )
+
+            save_reports()
+
+        except Exception:
+            pass
+        
         await interaction.message.delete()
 
     @discord.ui.button(
@@ -52,7 +108,9 @@ class ReportView(View):
 
         guild = interaction.guild
 
-        data = reports.get(target_message_id)
+        data = reports.get(
+            str(target_message_id)
+        )
 
         if not data:
             await interaction.response.send_message(
@@ -112,7 +170,25 @@ class ReportView(View):
             )
 
             if records_channel:
+                
+                existing_message = None
 
+                async for msg in records_channel.history(limit=500):
+
+                    if not msg.embeds:
+                        continue
+
+                    try:
+
+                        user_id_field = msg.embeds[0].fields[2]
+
+                        if user_id_field.value == str(offender.id):
+                            existing_message = msg
+                            break
+
+                    except Exception:
+                        pass
+    
                 embed = discord.Embed(
                     title="⚠️ Community Watch Record",
                     color=discord.Color.orange()
@@ -142,11 +218,26 @@ class ReportView(View):
                     inline=False
                 )
 
+                report_count = 1
+                
+                if existing_message:
+                    
+                    try:
+                        
+                        old_embed = existing_message.embeds[0]
+                        
+                        old_count = int(
+                            old_embed.fields[4].value
+                        )
+                        
+                        report_count = old_count + 1
+                    
+                    except Exception:
+                        report_count = 1
+                
                 embed.add_field(
                     name="Reports",
-                    value=str(
-                        len(data["reporters"])
-                    ),
+                    value=str(report_count),
                     inline=False
                 )
 
@@ -181,43 +272,17 @@ class ReportView(View):
                     url=offender.display_avatar.url
                 )
 
-                await records_channel.send(
-                    embed=embed
-                )
-
-        # Handle forum starter post
-        if (
-            message
-            and isinstance(
-                message.channel,
-                discord.Thread
-            )
-        ):
-
-            thread = message.channel
-
-            if message.id == thread.id:
-
-                try:
-                    await thread.edit(
-                        locked=True,
-                        archived=True
+                if existing_message:
+                    
+                    await existing_message.edit(
+                        embed=embed
                     )
-                except Exception:
-                    pass
-
-            else:
-                try:
-                    await message.delete()
-                except Exception:
-                    pass
-
-        elif message:
-
-            try:
-                await message.delete()
-            except Exception:
-                pass
+                
+                else:
+                    
+                    await records_channel.send(
+                        embed=embed
+                    )
 
         # Create / append case thread
         if offender:
@@ -278,7 +343,7 @@ class ReportView(View):
 
                     f"### 🛡️ Moderator Action\n"
                     f"**Moderator:** {interaction.user.mention}\n"
-                    f"**Reports:** {len(data['reporters'])}\n\n"
+                    f"**Reports:** {report_count}\n\n"
 
                     f"### 📍 Original Location\n"
                     f"<#{data['channel_id']}>\n\n"
@@ -291,17 +356,23 @@ class ReportView(View):
 
                 if existing_thread:
 
-                    await existing_thread.send(
-                        case_message
-                    )
-
-                    if message:
-
-                        for file in saved_files:
-                            
-                            await existing_thread.send(
-                                file=file
+                    try:
+                        
+                        starter_message = (
+                            await existing_thread.fetch_message(
+                                existing_thread.id
                             )
+                        )
+                        
+                        await starter_message.edit(
+                            content=case_message
+                        )
+                    
+                    except Exception as e:
+                        
+                        print(
+                            f"Case update failed: {e}"
+                        )
 
                 else:
 
@@ -321,9 +392,11 @@ class ReportView(View):
                             )
 
         reports.pop(
-            target_message_id,
+            str(target_message_id),
             None
         )
+        
+        save_reports()
 
         await interaction.message.delete()
 
@@ -644,10 +717,10 @@ class ReportSystem(commands.Cog):
         if reports_channel is None:
             return
 
-        if payload.message_id in reports:
+        if str(payload.message_id) in reports:
 
             data = reports[
-                payload.message_id
+                str(payload.message_id)
             ]
 
             if (
@@ -780,7 +853,7 @@ class ReportSystem(commands.Cog):
         except Exception:
             pass
 
-        reports[payload.message_id] = {
+        reports[str(payload.message_id)] = {
             "author_id":
                 message.author.id,
             "channel_id":
@@ -798,6 +871,8 @@ class ReportSystem(commands.Cog):
             "report_message_id":
                 report_message.id
         }
+        
+        save_reports()
 
 
 async def setup(bot):
