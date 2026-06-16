@@ -125,6 +125,7 @@ async def main():
         await bot.load_extension("cogs.camera_enforcement")
         await bot.load_extension("cogs.report_system")
         await bot.load_extension("cogs.forum_mirror")
+        await bot.load_extension("cogs.verification_board")
         await bot.start(TOKEN)
 
 
