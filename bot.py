@@ -19,6 +19,7 @@ intents.message_content = True
 intents.members = True
 intents.reactions = True
 intents.voice_states = True
+intents.guilds = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -123,6 +124,7 @@ async def main():
         await bot.load_extension("cogs.thread_verification")
         await bot.load_extension("cogs.camera_enforcement")
         await bot.load_extension("cogs.report_system")
+        await bot.load_extension("cogs.forum_mirror")
         await bot.start(TOKEN)
 
 
