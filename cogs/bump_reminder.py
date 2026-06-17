@@ -6,10 +6,9 @@ import os
 from discord.ext import commands
 
 DISBOARD_BOT_ID = 302050872383242240
+BUMP_CHANNEL = 1514975253908947040
 
-REMINDER_CHANNEL = 1514975253908947040
-
-DATA_FILE = "bump_timer.json"
+DATA_FILE = "bump_tracker.json"
 
 
 class BumpReminder(commands.Cog):
@@ -18,46 +17,118 @@ class BumpReminder(commands.Cog):
         self.bot = bot
         self.bump_task = None
 
-    # -------------------------
-    # JSON STORAGE
-    # -------------------------
-
-    def save_next_bump(self, timestamp):
-
-        with open(
-            DATA_FILE,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                {"next_bump": timestamp},
-                f
-            )
-
-    def load_next_bump(self):
+    def load_data(self):
 
         if not os.path.exists(DATA_FILE):
-            return None
+            return {}
+
+        try:
+            with open(DATA_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def save_data(self, data):
+
+        with open(DATA_FILE, "w") as f:
+            json.dump(data, f, indent=4)
+
+    async def update_tracker(
+        self,
+        bumper=None,
+        next_bump=None
+    ):
+
+        data = self.load_data()
+
+        channel = self.bot.get_channel(
+            BUMP_CHANNEL
+        )
+
+        if not channel:
+            return
+
+        message = None
+
+        message_id = data.get(
+            "tracker_message"
+        )
+
+        if message_id:
+
+            try:
+                message = await channel.fetch_message(
+                    message_id
+                )
+            except Exception:
+                pass
+
+        if not message:
+
+            message = await channel.send(
+                "Initializing bump tracker..."
+            )
+
+            data[
+                "tracker_message"
+            ] = message.id
+
+            self.save_data(data)
+
+        embed = discord.Embed(
+            title="🔔 Disboard Bump Tracker",
+            color=discord.Color.green()
+        )
+
+        embed.add_field(
+            name="Last Bumper",
+            value=(
+                bumper.mention
+                if bumper
+                else "Unknown"
+            ),
+            inline=False
+        )
+
+        if next_bump:
+
+            embed.add_field(
+                name="Next Bump",
+                value=(
+                    f"<t:{next_bump}:R>\n"
+                    f"<t:{next_bump}:F>"
+                ),
+                inline=False
+            )
+
+        await message.edit(
+            content=None,
+            embed=embed
+        )
+
+    async def reminder_timer(
+        self,
+        seconds
+    ):
 
         try:
 
-            with open(
-                DATA_FILE,
-                "r",
-                encoding="utf-8"
-            ) as f:
+            await asyncio.sleep(
+                seconds
+            )
 
-                data = json.load(f)
+            channel = self.bot.get_channel(
+                BUMP_CHANNEL
+            )
 
-            return data.get("next_bump")
+            if channel:
 
-        except Exception:
-            return None
+                await channel.send(
+                    "🔔 Disboard bump is available again! Use `/bump`."
+                )
 
-    # -------------------------
-    # STARTUP RECOVERY
-    # -------------------------
+        except asyncio.CancelledError:
+            pass
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -65,30 +136,31 @@ class BumpReminder(commands.Cog):
         if self.bump_task:
             return
 
-        next_bump = self.load_next_bump()
+        data = self.load_data()
 
-        if next_bump:
+        next_bump = data.get(
+            "next_bump"
+        )
 
-            now = discord.utils.utcnow().timestamp()
+        if not next_bump:
+            return
 
-            remaining = next_bump - now
+        remaining = (
+            next_bump
+            - int(
+                discord.utils.utcnow().timestamp()
+            )
+        )
 
-            if remaining > 0:
+        if remaining > 0:
 
-                self.bump_task = asyncio.create_task(
-                    self.bump_timer(
+            self.bump_task = (
+                asyncio.create_task(
+                    self.reminder_timer(
                         remaining
                     )
                 )
-
-                print(
-                    f"Bump timer restored "
-                    f"({int(remaining)}s remaining)"
-                )
-
-    # -------------------------
-    # DISBOARD DETECTION
-    # -------------------------
+            )
 
     @commands.Cog.listener()
     async def on_message(
@@ -96,7 +168,10 @@ class BumpReminder(commands.Cog):
         message
     ):
 
-        if message.author.id != DISBOARD_BOT_ID:
+        if (
+            message.author.id
+            != DISBOARD_BOT_ID
+        ):
             return
 
         if not message.embeds:
@@ -113,84 +188,39 @@ class BumpReminder(commands.Cog):
         if "bump done" not in description:
             return
 
-        print("Disboard bump detected")
-
-        # Cancel previous timer
-        if self.bump_task:
-
-            self.bump_task.cancel()
-
         next_bump = (
-            discord.utils.utcnow().timestamp()
+            int(
+                discord.utils.utcnow().timestamp()
+            )
             + 7200
         )
 
-        self.save_next_bump(
-            next_bump
-        )
+        data = self.load_data()
 
-        self.bump_task = asyncio.create_task(
-            self.bump_timer(
-                7200
+        data["next_bump"] = next_bump
+
+        self.save_data(data)
+
+        if self.bump_task:
+            self.bump_task.cancel()
+
+        self.bump_task = (
+            asyncio.create_task(
+                self.reminder_timer(
+                    7200
+                )
             )
         )
 
-    # -------------------------
-    # TIMER
-    # -------------------------
-
-    async def bump_timer(
-        self,
-        seconds
-    ):
-
-        try:
-
-            await asyncio.sleep(
-                seconds
-            )
-
-            channel = self.bot.get_channel(
-                REMINDER_CHANNEL
-            )
-
-            if channel:
-
-                timestamp = int(
-                    discord.utils.utcnow().timestamp()
-                )
-
-                embed = discord.Embed(
-                    title="🔔 Disboard Bump Ready",
-                    description=(
-                        "The server can be bumped again.\n\n"
-                        "Use **/bump** now."
-                    ),
-                    color=discord.Color.green()
-                )
-
-                embed.add_field(
-                    name="Status",
-                    value=(
-                        f"Available "
-                        f"<t:{timestamp}:R>"
-                    ),
-                    inline=False
-                )
-
-                await channel.send(
-                    embed=embed
-                )
-
-            if os.path.exists(DATA_FILE):
-                os.remove(DATA_FILE)
-
-        except asyncio.CancelledError:
-            pass
+        await self.update_tracker(
+            bumper=message.interaction.user
+            if message.interaction
+            else None,
+            next_bump=next_bump
+        )
 
 
 async def setup(bot):
-
     await bot.add_cog(
         BumpReminder(bot)
     )
