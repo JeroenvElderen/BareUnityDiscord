@@ -21,7 +21,6 @@ video-verification - 1515801461651542236 - Video channel
 
 
 newly-verified-garden - 1515812092350038096 - Category
-getting-started - 1515812480478220328 - text channel 
 team-introduction - 1515820692803686451 - forum channel 
 introduce-yourself -1515812572157444187 - forum channel 
 
