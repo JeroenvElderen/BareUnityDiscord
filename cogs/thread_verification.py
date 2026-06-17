@@ -4,9 +4,14 @@ from discord import app_commands
 
 FORUM_CHANNEL = 1515812572157444187
 
-VERIFIED_ROLE = 1516076523625648279
-SELF_INTRO_ROLE = 1516105660507357357
-APPROVED_ROLE = 1516076346025971803
+verified_role = interaction.guild.get_role(VERIFIED_ROLE)
+
+self_intro_role = interaction.guild.get_role(SELF_INTRO_ROLE)
+approved_role = interaction.guild.get_role(APPROVED_ROLE)
+
+pending_role = interaction.guild.get_role(1516093480630489089)      # Verification
+unverified_role = interaction.guild.get_role(1516075786350628955)   # Seedling
+team_guide_role = interaction.guild.get_role(1516104121550241902)   # Team Guide
 
 SHOWCASE_FORUM = 1516078310994612235
 
@@ -67,11 +72,15 @@ class ThreadVerification(commands.Cog):
             # Remove onboarding roles
             roles_to_remove = []
 
-            if self_intro_role:
-                roles_to_remove.append(self_intro_role)
-
-            if approved_role:
-                roles_to_remove.append(approved_role)
+            for role in [
+                self_intro_role,
+                approved_role,
+                pending_role,
+                unverified_role,
+                team_guide_role
+            ]:
+                if role:
+                    roles_to_remove.append(role)
 
             if roles_to_remove:
                 await member.remove_roles(*roles_to_remove)
