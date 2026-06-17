@@ -3,17 +3,14 @@ from discord.ext import commands
 from discord import app_commands
 
 FORUM_CHANNEL = 1515812572157444187
-
-verified_role = interaction.guild.get_role(VERIFIED_ROLE)
-
-self_intro_role = interaction.guild.get_role(SELF_INTRO_ROLE)
-approved_role = interaction.guild.get_role(APPROVED_ROLE)
-
-pending_role = interaction.guild.get_role(1516093480630489089)      # Verification
-unverified_role = interaction.guild.get_role(1516075786350628955)   # Seedling
-team_guide_role = interaction.guild.get_role(1516104121550241902)   # Team Guide
-
 SHOWCASE_FORUM = 1516078310994612235
+
+VERIFIED_ROLE = 1516076523625648279      # Evergreen
+SELF_INTRO_ROLE = 1516105660507357357    # Self Introduction
+APPROVED_ROLE = 1516076346025971803      # Sapling
+PENDING_ROLE = 1516093480630489089       # Verification
+UNVERIFIED_ROLE = 1516075786350628955    # Seedling
+TEAM_GUIDE_ROLE = 1516104121550241902    # Team Guide
 
 
 class ThreadVerification(commands.Cog):
@@ -57,6 +54,9 @@ class ThreadVerification(commands.Cog):
         verified_role = interaction.guild.get_role(VERIFIED_ROLE)
         self_intro_role = interaction.guild.get_role(SELF_INTRO_ROLE)
         approved_role = interaction.guild.get_role(APPROVED_ROLE)
+        pending_role = interaction.guild.get_role(PENDING_ROLE)
+        unverified_role = interaction.guild.get_role(UNVERIFIED_ROLE)
+        team_guide_role = interaction.guild.get_role(TEAM_GUIDE_ROLE)
 
         if verified_role is None:
             await interaction.response.send_message(
