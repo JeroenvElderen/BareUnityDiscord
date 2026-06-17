@@ -68,6 +68,14 @@ verification-notes - 1516470493673164810 - forum channel
 
 
 
+the-bare-council - 1516683045766168716 - category
+council-chamber - 1516683299865628683 - text channel
+meeting-notes - 1516683537120628787 - text channel
+council-votes - 1516683416383524929 - forum channel
+future-projects - 1516683478786379826 - forum channel
+council-fire - 1516683591403311104 - voice channel
+
+
 my roles:
 guided-member - 1516484347442761971
 community-watch - 1516171676361035796

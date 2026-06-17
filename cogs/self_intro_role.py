@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 
 FORUM_CHANNEL_ID = 1515820692803686451
-SELF_INTRO_ROLE = 1516105660507357357
-
+TEAM_GUIDE_ROLE = 1516104121550241902
 
 class SelfIntroRole(commands.Cog):
     def __init__(self, bot):
@@ -41,14 +40,14 @@ class SelfIntroRole(commands.Cog):
         if member is None or member.bot:
             return
 
-        role = guild.get_role(SELF_INTRO_ROLE)
+        role = guild.get_role(TEAM_GUIDE_ROLE)
 
         if role is None:
             return
 
         await member.add_roles(role)
 
-        print(f"Added Self Introduction role to {member}")
+        print(f"Added Teem Guide role to {member}")
 
 
 async def setup(bot):

@@ -150,11 +150,11 @@ class WelcomeThreads(commands.Cog):
             # ==================================
 
             embed3 = discord.Embed(
-                title="🌳 Final Onboarding",
+                title="🌳 Welcome To The Final Step",
                 description=(
                     "You're almost there.\n\n"
                     "Complete these final steps to become "
-                    "a fully verified member."
+                    "a fully verified member of Bare Unity."
                 ),
                 color=discord.Color.green()
             )
@@ -167,10 +167,10 @@ class WelcomeThreads(commands.Cog):
                     "**IMPORTANT:**\n"
                     "React with **🌿** to any Team Introduction "
                     "forum post.\n\n"
-                    "Do NOT react to a reply message.\n"
-                    "The reaction must be placed on the "
-                    "forum post itself.\n\n"
-                    "This grants the Self Introduction role."
+                    "❌ Do NOT react to a reply message.\n"
+                    "✅ React to the original forum post.\n\n"
+                    "This grants the **Team Guide** role and "
+                    "shows staff you completed this onboarding step."
                 ),
                 inline=False
             )
@@ -180,23 +180,28 @@ class WelcomeThreads(commands.Cog):
                 value=(
                     "**Forum:** <#1515812572157444187>\n\n"
                     "Create your own introduction thread.\n\n"
-                    "Suggested topics:\n"
+                    "**Please include:**\n"
                     "• Your naturist journey\n"
                     "• What naturism means to you\n"
                     "• What brought you to Bare Unity\n"
-                    "• Your interests and hobbies"
+                    "• A recent naturist photo (optional)\n\n"
+                    "Take your time and tell us about yourself.\n"
+                    "The more effort you put into your introduction, "
+                    "the easier it is for members and staff to get "
+                    "to know you."
                 ),
                 inline=False
             )
 
             embed3.add_field(
-                name="🏆 FINAL STEP • Become Evergreen",
+                name="🏆 FINAL STEP • Staff Review",
                 value=(
-                    "After staff review of your introduction,\n"
-                    "you will receive the\n"
-                    "**Evergreen (Verified)** role.\n\n"
-                    "You have now completed onboarding "
-                    "and gained full access to the community."
+                    "After posting your introduction:\n\n"
+                    "1️⃣ Staff review your post\n"
+                    "2️⃣ You receive the **Evergreen (Verified)** role\n"
+                    "3️⃣ Your onboarding is complete\n"
+                    "4️⃣ Full community access is unlocked\n\n"
+                    "We look forward to getting to know you."
                 ),
                 inline=False
             )
@@ -205,14 +210,14 @@ class WelcomeThreads(commands.Cog):
                 name="🌿 Community Values",
                 value=(
                     "Freedom • Respect • Privacy • Consent • Nature\n\n"
-                    "Thank you for helping keep Bare Unity "
-                    "safe, respectful and authentic."
+                    "Together we build a welcoming, respectful and "
+                    "authentic naturist community."
                 ),
                 inline=False
             )
 
             embed3.set_footer(
-                text="Final Steps • Step 3 of 3"
+                text="Welcome To The Final Step • Almost There!"
             )
 
             await thread.send(embed=embed1)
