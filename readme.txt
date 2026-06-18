@@ -75,6 +75,18 @@ future-projects - 1516683478786379826 - forum channel
 council-fire - 1516683591403311104 - voice channel
 
 
+platform-grove - 1517153830913966241 - category
+member-management - 1517155438615859390 - forum channel 
+platform-overview - 1517154197848592586 - text channel 
+platform-operations - 1517154255792902204 - text channel 
+member-applications - 1517153902087110788 - forum channel
+platform-reports - 1517153935658451236 - forum channel 
+gallery-review - 1517153973835010139 - forum channel 
+location-request - 1517154018776842301 - forum channel 
+country-updates - 1517154053375787198 - forum channel 
+platform-feedback - 1517154088310018129 - forum channel 
+case-files - 1517154128541909152 - forum channel 
+
 my roles:
 guided-member - 1516484347442761971
 community-watch - 1516171676361035796
