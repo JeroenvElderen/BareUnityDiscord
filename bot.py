@@ -128,6 +128,8 @@ async def main():
         await bot.load_extension("cogs.forum_mirror")
         await bot.load_extension("cogs.verification_board")
         await bot.load_extension("cogs.bump_reminder")
+        await bot.load_extension("cogs.member_management")
+        await bot.load_extension("cogs.location_requests")
         await bot.start(TOKEN)
 
 
